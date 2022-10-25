@@ -35,13 +35,37 @@ df = pd.read_csv('MidProject-Gender Gap in Spanish WP Data Set.csv')
 
 if selected == "Home":
     st.subheader(":low_brightness:Purpose of this project")
-    st.write("blah")
+    st.write("""
+    This project focuses on the analysis of everyday gender bias.
+
+    Today, even though we are familiar with the concept of the gender gap, gender discrimination, and so on,
+    we are hardly aware of the gender gap in digital sources.
+    The gender bias on Wikipedia is one example. """)
+
+    st.write("""
+    According to the research on 'students' use of Wikipedia as an academic resource',
+    about 87% of students use Wikipedia for their academic work. 
+    """)
+
+    st.write("""
+    As a widely used educational source, Wikipedia looks quite objective and seems to have no reason to be unequal at all.
+    However, surprisingly, Wikipedia is not equal material and failed to reach gender equality
+    even though they took a self-plan to increase women-contributors.
+    """)
+
+    st.subheader(":low_brightness:Gender Gap on Wikipedia")
+    st.write("""Wikipedia's Gender gap, as known as Gender Bias on Wikipedia supposes two problems in Wikipedia; \n
+    1) the contributors of Wikipedia are mainly men, \n
+    2) women-related topics are not well-covered.""")
+    
+    st.write("""With this concept, I analyzed the contributors' gender in the Spanish Wikipedia to answer these questions: \n
+    1) Is Wikipedia a gender-equal source in terms of participants? \n
+    2) Is Wikipedia gender-equal in terms of content?""")
+    st.write("""This project has significant meaning since pointing out gender bias can help us be aware of unfairness and inequality in society and we can one step forward to make more equal opportunities for both genders.""")
 
     st.subheader(":low_brightness:Sub")
-    st.write("blah")
-
-    st.subheader(":low_brightness:Sub")
-    st.write("blah")
+    st.write("""The analysis on Wikipedia gender gap will propose a new finding on unrevealed bias of content resources and wake us up to be aware of uneven playing field. Through this project, 
+    I wish these kinds of project can be extended to the awareness of bias in code(programming) as we know the majority of technical filed is mainly men.""")
     
 if selected == "Projects":
     # ===== PLOT MENU (HORIZONTAL)
@@ -57,7 +81,7 @@ if selected == "Projects":
 
     # ===== PLOT 1: BAR CHART (Count Plot) - Total number of contributors (women vs. men)
     with plot1:
-        st.subheader(":one:Total Number of Contributor By Gender")
+        st.subheader(":one:Total Number of Contributors By Gender")
         #source = {"Gender": ["Female", "Male", "Unknown"], 
         #    "Number": [df[df["gender"] == 2].count()["gender"], 
         #                df[df["gender"] == 1].count()["gender"], 
@@ -71,7 +95,9 @@ if selected == "Projects":
         sns.countplot(x="gender", data=df, palette=['gray','lightblue','violet'])
         st.pyplot(fig1)
         st.write("""Q1. How many women are among the active editors in the Spanish Wikipedia?""")
-        st.caption(":point_right: Female vs. Male")
+        st.caption(""":point_right: The column named as unknown includes both female and male, but they did not reveal their identity (gender) for public. 
+        Among the groups who revealed their identity for public, men accounts for about 85% and women account for about 15%. 
+        That is, the number of female contributors is 5 times lower than that of men.""")
 
     # ===== PLOT 2: LINE CHART - active percentage
     with plot2:
