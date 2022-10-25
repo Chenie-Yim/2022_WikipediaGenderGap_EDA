@@ -1,5 +1,4 @@
 import pandas as pd
-import streamlit as st
 import seaborn as sns
 import matplotlib.pyplot as plt
 import plotly.express as px
@@ -7,6 +6,7 @@ from plotly import graph_objects as go
 import altair as alt
 from PIL import Image
 import hiplot as hip
+import streamlit as st
 from streamlit_option_menu import option_menu
 
 # streamlit run mid.py
