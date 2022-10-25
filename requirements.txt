@@ -8,3 +8,4 @@ seaborn==0.11.2
 matplotlib==3.5.3
 altair==4.2.0
 hiplot==0.1.33
+protobuf<3.20
