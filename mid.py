@@ -7,6 +7,7 @@ from plotly import graph_objects as go
 import altair as alt
 from PIL import Image
 import hiplot as hip
+from streamlit_option_menu import option_menu
 
 # streamlit run mid.py
 
