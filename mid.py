@@ -9,7 +9,7 @@ import altair as alt
 from PIL import Image
 import hiplot as hip
 from streamlit_option_menu import option_menu
-import tkinter as Tk
+import tkinter as TK
 
 # streamlit run mid.py
 
