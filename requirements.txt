@@ -1,6 +1,6 @@
 pandas<1.6.0
 xlrd<2.0
-streamlit==0.74.1
+streamlit>=1.8.1
 plotly==4.14.3
 Pillow==8.1.2
 turtle==0.0.1
