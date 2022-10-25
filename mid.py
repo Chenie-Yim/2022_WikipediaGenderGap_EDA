@@ -33,7 +33,7 @@ selected = option_menu(
 df = pd.read_csv('MidProject-Gender Gap in Spanish WP Data Set.csv')
 
 if selected == "Home":
-    st.subheader(":low_brightness:Purpose of this project")
+    st.subheader(":key:Overview: Purpose of This Project")
     st.write("""
     This project focuses on the analysis of everyday gender bias.
 
@@ -52,7 +52,9 @@ if selected == "Home":
     even though they took a self-plan to increase women-contributors.
     """)
 
-    st.subheader(":low_brightness:Gender Gap on Wikipedia")
+    st.write("""\n""")
+
+    st.subheader(":question:Gender Gap on Wikipedia")
     st.write("""Wikipedia's Gender gap, as known as Gender Bias on Wikipedia supposes two problems in Wikipedia; \n
     1) the contributors of Wikipedia are mainly men, \n
     2) women-related topics are not well-covered.""")
@@ -62,12 +64,15 @@ if selected == "Home":
     2) Is Wikipedia gender-equal in terms of content?""")
     st.write("""This project has significant meaning since pointing out gender bias can help us be aware of unfairness and inequality in society and we can one step forward to make more equal opportunities for both genders.""")
 
-    st.subheader(":low_brightness:Sub")
+    st.write("""\n""")
+
+    st.subheader(":bulb:For the Eaqual Playing Ground")
     st.write("""The analysis on Wikipedia gender gap will propose a new finding on unrevealed bias of content resources and wake us up to be aware of uneven playing field. Through this project, 
-    I wish these kinds of project can be extended to the awareness of bias in code(programming) as we know the majority of technical filed is mainly men.""")
+    I wish these kinds of project can be extended to the awareness of bias in code(programming) as we know the majority of technical filed is mainly men.:couple:""")
     
 if selected == "Projects":
     # ===== PLOT MENU (HORIZONTAL)
+    text0 = st.container()
     plot1 = st.container()
     plot2 = st.container()
     plot3 = st.container()
@@ -77,8 +82,9 @@ if selected == "Projects":
     plot7 = st.container()
     
     st.dataframe(data = df) # DATA
-
     # ===== PLOT 1: BAR CHART (Count Plot) - Total number of contributors (women vs. men)
+    with text0:
+        st.write("""0: Unknown 1: Male 2: Female""")
     with plot1:
         st.subheader(":one:Total Number of Contributors By Gender")
         #source = {"Gender": ["Female", "Male", "Unknown"], 
@@ -101,7 +107,6 @@ if selected == "Projects":
     # ===== PLOT 2: LINE CHART - active percentage
     with plot2:
         st.subheader(":two:Gender Difference in Activity Duration")
-        st.caption(":point_right: dd")
         df['activepercent'] = df['NActDays']/df['NDays']*100
         
         labels_plot2 = ['Women + Men','Women Only', 'Men Only']
@@ -226,8 +231,11 @@ if selected == "Projects":
         st.pyplot(fig2_2)
 
         st.write("""Q2. Do women and men continue as ediotrs for similar periods of time?""")
-        st.caption(":point_right: Female vs. Male")
-
+        st.caption(""":chart_with_upwards_trend: Active Percentage (rate)= Active Days / Total Days""")
+        st.caption(""":point_right:When active rate is high, it means the contributor edited or created content on Wikipedia for many of days during practices days.
+        When comparing women and men in terms of editing practices duration, women tend to quit contribution faster than men do and active percentage is lower than that of men.
+        On top of that, women’s activity dropped significantly around after 120 to 150 days and almost staying all the time a low level, but men appear slightly different; they tend to continue their editing practices constantly as compared to women.
+        """)
 
     # ===== PLOT 3: Funnel Plot: number of edits (women vs. men) - Namespace
     with plot3:
@@ -236,6 +244,7 @@ if selected == "Projects":
         fig3_yaxis = st.radio("""Stacked Funnel Plot on Editing Practices""", labels_plot3)
         
         if fig3_yaxis == "General Pages":
+            st.write("1) Participation in General Pages")
             fig3_1 = go.Figure()
             fig3_1.add_trace(go.Funnel(
                 name='Female',
@@ -256,9 +265,15 @@ if selected == "Projects":
                 textinfo="value+percent initial",
                 textposition="inside"))
             st.plotly_chart(fig3_1, use_container_width=True)
-            st.caption(":point_right: dd")
+            st.caption(""":point_right: 
+            The median values of the editing practices on pages by gender are 33 for women and 70 for men. 
+            Women’s participation is much lower than that of men. 
+            However, when it comes to the median value of the pages created, 
+            it appears 6% of the women who participated in editing pages created new pages on Wikipedia. 
+            This ratio is almost same with that of men. """)
 
         elif fig3_yaxis == "Namespaces":
+            st.write("2) Participation in Namespace Pages")
             fig3_2 = go.Figure()
             fig3_2.add_trace(go.Funnel(
                 name='Female',
@@ -281,8 +296,10 @@ if selected == "Projects":
                 textinfo="value+percent initial",
                 textposition="inside"))
             st.plotly_chart(fig3_2, use_container_width=True)
-            
-            st.caption(":point_right: dd")
+            st.caption(""":point_right: 
+            The median values of the editing practices on namespace content by gender are 77 for women and 168 for men. 
+            Women’s participation is much lower than that of men, by more than half. It is same for namespace talk. 
+            However, when it comes to the median value of the namespace Wikipedia, it appears similar number for both genders. """)
 
         elif fig3_yaxis == "Pages Related to Women":
             st.write("3) Participation in Pages Related to Gender Issues")
@@ -309,14 +326,20 @@ if selected == "Projects":
                 textposition="inside"))
 
             st.plotly_chart(fig3_3, use_container_width=True)
-            st.caption(":point_right: dd")
+            st.caption(""":point_right: Female contributors are much more active in participation in the pages related to women topics. 
+            When women edit the about two pages related women, men edited only 0.3 pages. 
+            Even, women’s editing practices account for almost the whole WikiProject related to women topics.""")
             st.caption(":link:https://en.wikipedia.org/wiki/Wikipedia:WikiProject_Women")
+        st.write("""Q3. Are the edits of women and men different?""")
+        st.caption(""":point_right: Even though the medians of women’s editing practices are lower than that of men, 
+        it is because of the lack of the numbers of the female contributors. 
+        Rather, they are much more active in gender issues and their editing practices are not significantly different from men in terms of ratio between page categories.
+        Thus, it seems that the gender bias on Wikipedia comes from an absolute shortage of female contributors. """)
 
-        
-        
+
     # ===== PLOT 4: number of different pages (women vs. men) - content 
     with plot4:
-        st.subheader(':four:Regression Analysis on Activity vs. Duration')
+        st.subheader(':four:Detail: Gender Difference in Editing Practices by Activity and Duration')
 
         # ==== SIDEBAR
         labels = ['# of Pages Edited','# of Pages Created', '# Pages Realted to Women', '# of WikiProject Related Women']
@@ -343,10 +366,7 @@ if selected == "Projects":
     #activity_selected = st.selectbox("Which parameter would you like to see?")
     # ===== PLOT 5: LINE CHART, BAR CHART - Lifespan, % of active days, Edits per active day
     with plot5:
-        st.subheader(":five:")
-
-    with plot6:
-        st.subheader(":six: Detail: Gender Difference in Editing Practices")
+        st.subheader(":five:Detail: Gender Difference in Editing Practices by Pages Flow")
         hiplot_options = st.multiselect('Select Namespace Activity', ['Content', 'Talk', 'Wikipedia', 'User', 'User Talk'])
         df_hiplot = pd.DataFrame()
         for options in hiplot_options:
