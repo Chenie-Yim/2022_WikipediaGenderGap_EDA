@@ -1,4 +1,3 @@
-from turtle import color
 import pandas as pd
 import streamlit as st
 import seaborn as sns
@@ -9,7 +8,6 @@ import altair as alt
 from PIL import Image
 import hiplot as hip
 from streamlit_option_menu import option_menu
-import tkinter as TK
 
 # streamlit run mid.py
 
