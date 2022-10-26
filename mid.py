@@ -357,7 +357,14 @@ if selected == "Projects":
         fig4 = sns.lmplot(data=df, x="NActDays", y=y, hue="gender", palette="icefire")
         st.pyplot(fig4)
 
-        st.caption(":point_right: dd")
+        st.write("""Q4. Do women and men show different patterns in their editing practices along the editing duration?"
+        """)
+        st.caption(""":point_right: Even though women's active editing periods are shorter than that of men, overall, they are being more active as time goes by.
+        The regression line in # of pages edited vs. # of active days shows its slope is steeper than that of men, 
+        and in the case of # of pages created, women and men appear almost similar trends.
+        However, when it comes to the pages related to women and the WikiProject related to women, 
+        women's regression lines grow much steeper while men show almost no changes at all. 
+        """)
         st.caption("*A Wikipedia namespace is a set of Wikipedia pages whose names begin with a particular reserved word recognized by the MediaWiki software.")
 
     # ===== SELECT 5 - STREAMLIT SELECTION - Lifespan, % of active days, Edits per active day, % of dropout
@@ -383,7 +390,14 @@ if selected == "Projects":
         df_hiplot['Gender'] = df['gender']        
 
         hip.Experiment.from_dataframe(df_hiplot).display_st()
-        st.caption(":point_right: dd")
+        st.write("""
+        
+        """)
+        st.caption(""":point_right: The Hiplot shows the editing practices in detail for both genders.
+        If looking into only men, spread its line over the wide scope. 
+        However, when it comes to women, the lines are staying close to the bottom, 
+        and it means women less participate in editing practices. 
+        """)
 
 if selected == "Contact":
     st.subheader(":open_mouth: For more information:")
