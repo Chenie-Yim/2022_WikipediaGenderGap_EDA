@@ -1,15 +1,22 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-import plotly.express as px
 from plotly import graph_objects as go
 import altair as alt
-from PIL import Image
 import hiplot as hip
 import streamlit as st
 from streamlit_option_menu import option_menu
 
-# streamlit run mid.py
+import numpy as np
+from sklearn.preprocessing import StandardScaler, RobustScaler
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.feature_selection import RFECV
+from sklearn.metrics import confusion_matrix, f1_score
+from sklearn.model_selection import train_test_split, cross_val_score, KFold
+
+# streamlit run final.py
 
 # ===== HEADER
 st.set_page_config(page_title='Wikipedia, Mind the Gender Gap')
@@ -21,8 +28,8 @@ with header:
 # ===== SIDEBAR MENU (HORIZONTAL)
 selected = option_menu(
         menu_title=None,
-        options=["Home", "Projects", "Contact"],
-        icons=["house", "book", "envelope"],
+        options=["Home", "Analysis", "ML", "Contact"],
+        icons=["house", "book", "motherboard", "envelope"],
         menu_icon="cast",
         default_index=0,
         orientation="horizontal",
@@ -70,7 +77,7 @@ if selected == "Home":
     st.write("""The analysis on Wikipedia gender gap will propose a new finding on unrevealed bias of content resources and wake us up to be aware of uneven playing field. Through this project, 
     I wish these kinds of project can be extended to the awareness of bias in code(programming) as we know the majority of technical filed is mainly men.:couple:""")
     
-if selected == "Projects":
+if selected == "Analysis":
     # ===== PLOT MENU (HORIZONTAL)
     text0 = st.container()
     plot1 = st.container()
@@ -404,3 +411,349 @@ if selected == "Contact":
     st.write(":open_hands:If you require any further information, please feel free to reach out to me!:open_hands:")
     st.write(":email: chaeyeon.yim95@gmail.com")
     st.write(":email: yimchaey@msu.edu")
+
+if selected == "ML":
+    common = st.container()
+    with common: 
+        # DATASET CLEANING
+        df_ml = df[df['gender'] != 0].drop(['C_api', 'C_man', 'firstDay', 'lastDay', 'E_NEds', 'E_Bpag', 'weightIJ', 'NIJ'], axis = 1)
+
+        # splitting data
+        X = df_ml.drop('gender', axis = 1)
+        y = df_ml['gender']
+        
+        # Selecting model
+        st.subheader('')
+        st.subheader(":one:Select Machine Learning Model")
+        clf = st.selectbox('Classification Model: Choose 1', ('Random Forest', 'RBF SVM', 'Decision Tree'))
+        
+        # DATASET SPLIT SIZE
+        st.subheader("")
+        splitting = st.container()
+        with splitting:
+        # Test data size
+            st.subheader(":two:Split the Dataset Into Train / Test")
+            start_state = st.slider('Test Dataset Size:  Choose between 0.1 - 0.5', min_value = 0.1, max_value = 0.5, value = 0.3)
+            st.write("Test dataset size: ", float("{:.3f}".format(start_state*100)), "Train dataset size: ", float("{:.3f}".format((1-start_state)*100)))
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = start_state)
+
+    machineLearning = st.container()
+    with machineLearning:
+    # Classifier
+        if clf == 'Random Forest':
+            random_forest_options = st.container()
+            
+            with random_forest_options:
+                st.subheader(":three:Select Hyper Parameters")
+                col1_1, col1_2= st.columns(2)
+                with col1_1:
+                    n_estimator = st.slider('The number of trees in the forest:', min_value = 1, max_value = 30, value = 10)
+                with col1_2:
+                    max_depth = st.slider('The maximum depth of the tree:', min_value = 1, max_value = 10, value = 5)
+                
+                col1_3, col1_4 = st.columns(2)
+                with col1_3:
+                    max_feature = st.slider('The number of features:', min_value = 1, max_value = 20, value = 1)
+                with col1_4:
+                    random_state = st.slider('Random State:', min_value = 0, max_value = 50, value = 42)
+
+            # Rsculsive Feature Elimination
+            reculsive_feature_elimination = st.container()
+            with reculsive_feature_elimination:
+                features = X.columns
+                rf = RandomForestClassifier(n_estimators=n_estimator, max_depth=max_depth, max_features=max_feature, random_state=random_state)
+                rf.fit(X_train,y_train)
+
+                f_i = list(zip(features,rf.feature_importances_))
+                f_i.sort(key = lambda x : x[1])
+                fig5, x5 = plt.subplots()
+                x5.barh([x[0] for x in f_i],[x[1] for x in f_i], alpha = 0.7, color = 'green')
+                plt.title('Features Ranking')
+                st.pyplot(fig5)
+
+                top_features = [x[0] for x in f_i]
+                n_col = st.slider('The number of columns to use: Choose between 1 -12', min_value = 1, max_value = 12, value = 4)
+                X_train_featured = X_train[top_features[0:n_col]] # vary the number
+                X_test_featured = X_test[top_features[0:n_col]] # vary the number
+
+                #rfe = RFECV(rf,cv=5,scoring="neg_mean_squared_error") # Negative Squared Error
+                #rfe.fit(X_train,y_train)        
+            
+            # Scaling Method
+            scale_options = st.container()
+            with scale_options: 
+                st.subheader("")
+                st.subheader(":four:Select Scaling Method")
+                scaling_method = st.radio('Scaling Method:',['Standard Scaler', 'Robust Scaler'])
+                if scaling_method == 'Standard Scaler':
+                    my_scaler = StandardScaler()
+                    my_scaler.fit(X_train_featured)
+                    X_train_scaled = my_scaler.transform(X_train_featured)
+                    X_test_scaled = my_scaler.transform(X_test_featured)
+
+                elif scaling_method == 'Robust Scaler': 
+                    my_scaler = RobustScaler()
+                    my_scaler.fit(X_train_featured)
+                    X_train_scaled = my_scaler.transform(X_train_featured)
+                    X_test_scaled = my_scaler.transform(X_test_featured)
+
+                my_classifier = RFECV(rf,cv=5,scoring="neg_mean_squared_error") # Negative Squared Error
+                my_classifier.fit(X_train_scaled, y_train)
+                y_pred = my_classifier.predict(X_test_scaled)
+
+            # Score Table
+            score_table = st.container()
+            with score_table:
+                st.subheader(':signal_strength:Check the Performance')
+                accuracy = my_classifier.score(X_test_scaled, y_test)
+                f1score = f1_score(y_test, y_pred, average = 'weighted')
+
+                # Cross Validation
+                kfold = KFold(n_splits = 5, random_state = 7, shuffle = True)
+                cv_res = cross_val_score(my_classifier, X_train_scaled, y_train, cv = kfold, scoring = 'accuracy')
+                
+                # Score Display
+                col2_1, col2_2, col2_3, col2_4 = st.columns(4)
+                with col2_1:           
+                    st.metric(label="Accuracy", value=float("{:.3f}".format(accuracy)))
+                with col2_2:
+                    st.metric(label="F1 Score", value=float("{:.3f}".format(f1score)))
+                with col2_3:
+                    st.metric(label = "Cross Validation-Mean", value = float("{:.3f}".format(cv_res.mean())))
+                with col2_4: 
+                    st.metric(label = "Cross Validation-Std", value = float("{:.3f}".format(cv_res.std())))
+
+                st.write(""":triangular_flag_on_post:F1 score: a harmonic mean of the precision and recall, where an F1 score reaches its best value at 1 and worst score at 0.""")
+                st.latex(r'''F1 = 2 * \frac{precision * recall}{precision + recall}''')
+                st.write(""":triangular_flag_on_post:Cross Validation Score: """)
+
+            # Confusion Matrix
+            confusion_mat = st.container()
+            with confusion_mat:
+                st.subheader("")
+                st.subheader(""":mag:Confusion Matrix""")
+                cf_matrix = confusion_matrix(y_test, y_pred)
+                group_names = ['True Negative','False Positive','False Negative','True Positive']
+                group_counts = ["{0:0.0f}".format(value) for value in cf_matrix.flatten()]
+                group_percentages = ["{0:.2%}".format(value) for value in cf_matrix.flatten()/np.sum(cf_matrix)]
+                labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in zip(group_names,group_counts,group_percentages)]
+                labels = np.asarray(labels).reshape(2,2)
+                fig6, x6 = plt.subplots(figsize=(6,4))
+                sns.heatmap(cf_matrix, annot=labels, fmt='', cmap='Greens', ax=x6)
+                st.write(fig6)
+            
+            # Data Visualization
+            test_and_pred_plot = st.container()
+            with test_and_pred_plot:
+                st.subheader("")
+                st.subheader(""":chart_with_upwards_trend:Data Visualization""")
+                fig7, x7 = plt.subplots(figsize=(6,3))
+                x7.plot(y_test, label='Origin', alpha = 0.5) # initial data
+                x7.plot(y_pred, label='Random Forest', color="red")
+                x7.legend(loc='upper right')
+                st.pyplot(fig7)
+
+        elif clf == 'RBF SVM':
+            svm_options = st.container()
+            with svm_options:
+                col3_1, col3_2, col3_3 , col3_4 = st.columns(4)
+                with col3_1:
+                    c = st.slider('Regularization parameter:', min_value = 0.1, max_value = 100.0, value = 1.0)
+                with col3_2:
+                    kernel_options = ['poly', 'rbf']
+                    kernel = st.select_slider('Kernel: ', options = kernel_options)
+                with col3_3:
+                    gamma_options = ['scale','auto']
+                    gamma = st.select_slider('Kernel coefficient:', options = gamma_options)
+                with col3_4:
+                    random_state = st.slider('Random State: ', min_value = 0, max_value = 50, value = 42)
+                st.caption("""penalty parameter of the error term""")
+            
+            # Scaling Method
+            scale_options = st.container()
+            with scale_options:
+                st.subheader('')
+                st.subheader(":three:Select Scaling Method")
+                scaling_method = st.radio('Scaling Method:',['Standard Scaler', 'Robust Scaler'])
+                if scaling_method == 'Standard Scaler':
+                    my_scaler = StandardScaler()
+                    my_scaler.fit(X_train)
+                    X_train_scaled = my_scaler.transform(X_train)
+                    X_test_scaled = my_scaler.transform(X_test)
+
+                elif scaling_method == 'Robust Scaler': 
+                    my_scaler = RobustScaler()
+                    my_scaler.fit(X_train)
+                    X_train_scaled = my_scaler.transform(X_train)
+                    X_test_scaled = my_scaler.transform(X_test)
+            
+            # SCORE
+            score_table = st.container()
+            with score_table:
+                my_classifier = SVC(C = c, kernel = kernel, gamma = gamma, random_state = random_state, class_weight = 'balanced')
+                my_classifier.fit(X_train, y_train)
+                train_score = my_classifier.score(X_train, y_train)
+                test_score = my_classifier.score(X_test, y_test)
+
+                col4_1, col4_2, col4_3, col4_4 = st.columns(4)
+                with col4_1:           
+                    st.metric(label="Train Score", value=float("{:.3f}".format(train_score)))
+                with col4_2:
+                    st.metric(label="Test Score", value=float("{:.3f}".format(test_score)))
+
+                my_classifier.fit(X_train, y_train)
+                y_pred = my_classifier.predict(X_test)
+
+                # Accuracy Score
+                accuracy = my_classifier.score(X_test, y_test)
+                f1score = f1_score(y_test, y_pred, average = 'weighted')
+                st.caption("""F1 score: a harmonic mean of the precision and recall, where an F1 score reaches its best value at 1 and worst score at 0.""")
+                st.latex(r'''F1 = 2 * \frac{precision * recall}{precision + recall}''')
+
+                # Cross Validation
+                kfold = KFold(n_splits = 10, random_state = 7, shuffle = True)
+                cv_res = cross_val_score(my_classifier, X_train, y_train, cv = kfold, scoring = 'accuracy')
+                
+                # Score Display
+                col5_1, col5_2, col5_3, col5_4 = st.columns(4)
+                with col5_1:           
+                    st.metric(label="Accuracy", value=float("{:.3f}".format(accuracy)))
+                with col5_2:
+                    st.metric(label="F1 Score", value=float("{:.3f}".format(f1score)))
+                with col5_3:
+                    st.metric(label = "Cross Validation-Mean", value = float("{:.3f}".format(cv_res.mean())))
+                with col5_4: 
+                    st.metric(label = "Cross Validation-Std", value = float("{:.3f}".format(cv_res.std())))
+
+            
+            # Confusion Matrix
+            confusion_mat = st.container()
+            with confusion_mat:
+                st.subheader("")
+                st.subheader(""":mag:Confusion Matrix""")
+                cf_matrix = confusion_matrix(y_test, y_pred)
+                group_names = ['True Negative','False Positive','False Negative','True Positive']
+                group_counts = ["{0:0.0f}".format(value) for value in cf_matrix.flatten()]
+                group_percentages = ["{0:.2%}".format(value) for value in cf_matrix.flatten()/np.sum(cf_matrix)]
+                labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in zip(group_names,group_counts,group_percentages)]
+                labels = np.asarray(labels).reshape(2,2)
+                fig8, x8 = plt.subplots(figsize=(6,4))
+                sns.heatmap(cf_matrix, annot=labels, fmt='', cmap='Greens', ax=x8)
+                st.write(fig8)
+            
+            # Data Visualization
+            test_and_pred_plot = st.container()
+            with test_and_pred_plot:
+                st.subheader("")
+                st.subheader(""":chart_with_upwards_trend:Data Visualization""")
+                fig9, x9 = plt.subplots(figsize=(6,3))
+                x9.plot(y_test, label='Origin', alpha = 0.5) # initial data
+                x9.plot(y_pred, label='Random Forest', color="red")
+                x9.legend(loc='upper right')
+                st.pyplot(fig9)
+
+        elif clf == 'Decision Tree':
+            decision_tree_options = st.container()
+            with decision_tree_options:
+                col6_1, col6_2, col6_3= st.columns(3)
+                with col6_1:
+                    max_depth = st.slider('The maximum depth od the tree:', min_value = 1, max_value = 10, value = 5)
+                with col6_2:
+                    max_feature = st.slider('The number of features:', min_value = 1, max_value = 10, value = 1)
+                with col6_3:
+                    random_state = st.slider('Random State: ', min_value = 0, max_value = 50, value = 42)
+            
+            # Rsculsive Feature Elimination
+            reculsive_feature_elimination = st.container()
+            with reculsive_feature_elimination:
+                st.subheader(":paperclip:Reculsive Feature Elimination")
+                features = X.columns
+                rf = DecisionTreeClassifier(max_depth=max_depth, max_features=max_feature, random_state=random_state)
+                rf.fit(X_train,y_train)
+
+                f_i = list(zip(features,rf.feature_importances_))
+                f_i.sort(key = lambda x : x[1])
+                fig11, x11 = plt.subplots()
+                x11.barh([x[0] for x in f_i],[x[1] for x in f_i], alpha = 0.7, color = 'green')
+                plt.title('Features Ranking')
+                st.pyplot(fig11)
+
+                top_features = [x[0] for x in f_i]
+                n_col = st.slider('The number of columns to use: Choose between 1 -12', min_value = 1, max_value = 12, value = 4)
+                X_train_featured = X_train[top_features[0:n_col]] # vary the number
+                X_test_featured = X_test[top_features[0:n_col]] # vary the number
+
+            # Scaling Method
+            scale_options = st.container()
+            with scale_options: 
+                st.subheader("")
+                st.subheader(":four:Select Scaling Method")
+                scaling_method = st.radio('Scaling Method:',['Standard Scaler', 'Robust Scaler'])
+                if scaling_method == 'Standard Scaler':
+                    my_scaler = StandardScaler()
+                    my_scaler.fit(X_train_featured)
+                    X_train_scaled = my_scaler.transform(X_train_featured)
+                    X_test_scaled = my_scaler.transform(X_test_featured)
+
+                elif scaling_method == 'Robust Scaler': 
+                    my_scaler = RobustScaler()
+                    my_scaler.fit(X_train_featured)
+                    X_train_scaled = my_scaler.transform(X_train_featured)
+                    X_test_scaled = my_scaler.transform(X_test_featured)
+
+                my_classifier = RFECV(rf,cv=5,scoring="neg_mean_squared_error")
+                my_classifier.fit(X_train_scaled, y_train)
+                y_pred = my_classifier.predict(X_test_scaled)
+
+            # Score Table
+            score_table = st.container()
+            with score_table:
+                st.subheader('')
+                st.subheader(':signal_strength:Check the Performance')
+                accuracy = my_classifier.score(X_test_scaled, y_test)
+                f1score = f1_score(y_test, y_pred, average = 'weighted')
+
+                # Cross Validation
+                kfold = KFold(n_splits = 5, random_state = 7, shuffle = True)
+                cv_res = cross_val_score(my_classifier, X_train_scaled, y_train, cv = kfold, scoring = 'accuracy')
+                
+                # Score Display
+                col7_1, col7_2, col7_3, col7_4 = st.columns(4)
+                with col7_1:           
+                    st.metric(label="Accuracy", value=float("{:.3f}".format(accuracy)))
+                with col7_2:
+                    st.metric(label="F1 Score", value=float("{:.3f}".format(f1score)))
+                with col7_3:
+                    st.metric(label = "Cross Validation-Mean", value = float("{:.3f}".format(cv_res.mean())))
+                with col7_4: 
+                    st.metric(label = "Cross Validation-Std", value = float("{:.3f}".format(cv_res.std())))
+
+                st.write(""":triangular_flag_on_post:F1 score: a harmonic mean of the precision and recall, where an F1 score reaches its best value at 1 and worst score at 0.""")
+                st.latex(r'''F1 = 2 * \frac{precision * recall}{precision + recall}''')
+                st.write(""":triangular_flag_on_post:Cross Validation Score: """)
+
+            # Confusion Matrix
+            confusion_mat = st.container()
+            with confusion_mat:
+                st.subheader("")
+                st.subheader(""":mag:Confusion Matrix""")
+                cf_matrix = confusion_matrix(y_test, y_pred)
+                group_names = ['True Negative','False Positive','False Negative','True Positive']
+                group_counts = ["{0:0.0f}".format(value) for value in cf_matrix.flatten()]
+                group_percentages = ["{0:.2%}".format(value) for value in cf_matrix.flatten()/np.sum(cf_matrix)]
+                labels = [f"{v1}\n{v2}\n{v3}" for v1, v2, v3 in zip(group_names,group_counts,group_percentages)]
+                labels = np.asarray(labels).reshape(2,2)
+                fig12, x12 = plt.subplots(figsize=(6,4))
+                sns.heatmap(cf_matrix, annot=labels, fmt='', cmap='Greens', ax=x12)
+                st.write(fig12)
+            
+            # Data Visualization
+            test_and_pred_plot = st.container()
+            with test_and_pred_plot:
+                st.subheader("")
+                st.subheader(""":chart_with_upwards_trend:Data Visualization""")
+                fig13, x13 = plt.subplots(figsize=(6,3))
+                x13.plot(y_test, label='Origin', alpha = 0.5) # initial data
+                x13.plot(y_pred, label='Random Forest', color="red")
+                x13.legend(loc='upper right')
+                st.pyplot(fig13)
