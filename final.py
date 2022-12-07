@@ -1,6 +1,7 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import plotly.express as px
 from plotly import graph_objects as go
 import altair as alt
 import hiplot as hip
